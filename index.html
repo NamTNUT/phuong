@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>❤️ Lưu Hiền❤️</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      background: radial-gradient(ellipse at center, #1a001a 0%, #000000 100%);
+      font-family: 'Courier New', monospace;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    #centerText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3vw;
+      font-weight: bold;
+      background: linear-gradient(90deg, red, pink, violet);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      white-space: nowrap;
+      z-index: 2;
+      text-shadow: 0 0 5px #fff;
+    }
+    #catImage {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.7);
+      z-index: 3;
+      max-width: 20vw;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px pink;
+    }
+    .bubble {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: floatUp linear forwards;
+      color: #ff69b4;
+      pointer-events: none;
+    }
+    @keyframes floatUp {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-200px); opacity: 0; }
+    }
+    #wishText {
+      position: absolute;
+      bottom: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5vw;
+      color: #ffccee;
+      text-shadow: 0 0 8px #ff99cc;
+      z-index: 3;
+      opacity: 0;
+      transition: opacity 2s ease;
+      text-align: center;
+    }
+    #playMusicBtn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      padding: 10px 15px;
+      background: #ff69b4;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 10px pink;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrixCanvas"></canvas>
+  <div id="centerText">❤️ Happy birthday Phương❤️</div>
+  <img id="catImage" src="https://scontent.fhan17-1.fna.fbcdn.net/v/t39.30808-1/385435276_1473123490196115_6304498060722207245_n.jpg?stp=dst-jpg_s200x200_tt6&_nc_cat=105&ccb=1-7&_nc_sid=1d2534&_nc_eui2=AeHcMnCQ2YgnOOEAun5aBoN7KJVkDkSl2fcolWQORKXZ95Ra5iVpLqu77xDIlkOcowZ74VAVvlLrmSRtkdoRnL8p&_nc_ohc=Seq2RvacuiwQ7kNvwFAoFj5&_nc_oc=AdmKbATFy8K46yk3fSa6lqowWGOMTyknDkN14fbTW17mJHwespXz8XMP5hGBn0l4ZWAAkEO447kFq6KoBV3alc4q&_nc_zt=24&_nc_ht=scontent.fhan17-1.fna&_nc_gid=SJSOYUaLvzx9ELUbSYSiyA&oh=00_AfTKgdm6-vTpTURLAB_TWJia53FFBxUCFBfyLhUVR-TKEA&oe=686F033B" alt="Ảnh mèo dễ thương">
+  <div id="wishText">Chúc mừng sinh nhật em Phương 💖<br>Chúc em luôn xinh đẹp, sức khoẻ, lúc nào cũng nhận được nhiều niềm vui</div>
+
+  <!-- Nút phát nhạc -->
+  <button id="playMusicBtn">Bấm để bật nhạc 🎵</button>
+  <audio id="bgMusic" loop>
+    <source src="https://raw.githubusercontent.com/NamTNUT/luuhien.github.io/main/ChucMungSinhNhat-PhanDinhTung-2804028.mp3" type="audio/mpeg">
+    Trình duyệt không hỗ trợ nhạc.
+  </audio>
+<!-- Popup -->
+<div id="popup" style="
+  position: fixed;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff0f5;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 0 15px pink;
+  z-index: 10000;
+  display: none;
+  text-align: center;
+">
+  <p style="font-size: 1.5rem; color: #d63384;">Làm gì có nhạc mà nghe?</p>
+  <button id="happyBtn" style="margin: 1rem; padding: 10px 20px; font-size: 1rem; background-color: #ff69b4; color: white; border: none; border-radius: 8px;">Vui</button>
+  <button id="notHappyBtn" style="margin: 1rem; padding: 10px 20px; font-size: 1rem; background-color: #999; color: white; border: none; border-radius: 8px;">Không vui</button>
+</div>
+
+  <script>
+    // Matrix background
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    const message = 'chúc mừng sinh nhật';
+    const letters = message.split('');
+    const fontSize = 16;
+    let columns = Math.floor(window.innerWidth / fontSize);
+    let drops = Array(columns).fill(1);
+    ctx.font = fontSize + "px monospace";
+    function drawMatrixRain() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < drops.length; i++) {
+        const char = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillStyle = 'hsl(' + (Math.random() * 360) + ', 100%, 60%)';
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+        ctx.fillText(char, x, y);
+        if (y > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrixRain, 33);
+
+    // Bubbles
+    function createBubble() {
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      bubble.innerText = '💖';
+      bubble.style.left = Math.random() * window.innerWidth + 'px';
+      bubble.style.bottom = '0px';
+      bubble.style.animationDuration = 2 + Math.random() * 2 + 's';
+      document.body.appendChild(bubble);
+      setTimeout(() => { bubble.remove(); }, 4000);
+    }
+    setInterval(createBubble, 500);
+
+    // Show wishText after 5s
+    setTimeout(() => {
+      document.getElementById('wishText').style.opacity = 1;
+    }, 5000);
+
+    // Phát nhạc khi nhấn nút
+  </script>
+  <script>
+  // Popup behavior
+  const popup = document.getElementById('popup');
+  const happyBtn = document.getElementById('happyBtn');
+  const notHappyBtn = document.getElementById('notHappyBtn');
+  const music = document.getElementById('bgMusic');
+
+  document.getElementById('playMusicBtn').addEventListener('click', function () {
+    popup.style.display = 'block';
+    this.style.display = 'none';
+  });
+
+  happyBtn.addEventListener('click', function () {
+    music.play().catch(err => console.log(err));
+    popup.style.display = 'none';
+  });
+
+  function movePopupRandom() {
+    const top = Math.random() * 70 + 10;  // 10% to 80%
+    const left = Math.random() * 70 + 10;
+    popup.style.top = `${top}%`;
+    popup.style.left = `${left}%`;
+  }
+
+  notHappyBtn.addEventListener('mouseenter', movePopupRandom);
+  notHappyBtn.addEventListener('click', movePopupRandom);
+</script>
+
+</body>
+</html>
